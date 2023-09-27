@@ -61,7 +61,7 @@ def communication_round_train(writer, n_rounds, n_clients, n_classes, normalizat
                               external_distillation, valid_loader_server, common_dataset_size, layer, loss_type,
                               path, multiloss, scale, multiloss_type, incremental_step, train_set, valid_set,
                               batch_size, valid_dataset_server, server_exemplar_size, client_train_exemplar_size, client_valid_exemplar_size,
-                              mu, temperature, incremental_rounds, incremental_validation_type, model_buffer_size, testSet, test_loader):
+                              mu, temperature, incremental_rounds, model_buffer_size, testSet, test_loader):
 
 
     best_round=0
@@ -197,20 +197,15 @@ def communication_round_train(writer, n_rounds, n_clients, n_classes, normalizat
 
 
 
-            if incremental_validation_type == 'a':
-
-                valid_loader_server=valid_loader_server_temp
 
 
-            elif incremental_validation_type == 'b':
 
-
-                test_loader_inc, _ = incremental_dataloader_creation(
-                    test_loader, testSet,
-                    [0, seen_ids[1]], 0,
-                    batch_size, test_transform,
-                    0, model_inc, 0,
-                    incremental_step)
+            test_loader_inc, _ = incremental_dataloader_creation(
+                test_loader, testSet,
+                [0, seen_ids[1]], 0,
+                batch_size, test_transform,
+                0, model_inc, 0,
+                incremental_step)
 
 
 
@@ -240,7 +235,7 @@ def communication_round_train(writer, n_rounds, n_clients, n_classes, normalizat
                     create_all_incremental_dataloaders( model_inc, feature_extractor, client, seen_ids, test_transform,
                    train_loader_list, valid_loader_list, exemplar_classes, incremental_step,train_set, batch_size, client_train_exemplar_size,
                     exemplar_ids_tr, exemplar_ids_val, exemplar_ids_srv, valid_set,  client_valid_exemplar_size, feature_extractor_np,
-                    incremental_validation_type)
+                    )
 
 
 
@@ -285,7 +280,7 @@ def communication_round_train(writer, n_rounds, n_clients, n_classes, normalizat
                              n_classes, mode, coef_t,coef_d, list_name, soft_logits, soft_logits_l, extracted_logits, average, external_distillation, valid_loader_server,
                              common_dataset_size, layer,  loss_type, path,  multiloss, scale, multiloss_type,
                              incremental_step, mu, temperature, incremental_rounds, model_buffer_size, per_round_soft_activation, per_task_soft_activation,
-                             test_loader_inc, test_c_loss, test_c_prec, incremental_validation_type, valid_loader_server_inc)
+                             test_loader_inc, test_c_loss, test_c_prec, valid_loader_server_inc)
 
 
 
@@ -469,7 +464,7 @@ def communication_round_train(writer, n_rounds, n_clients, n_classes, normalizat
             writer.flush()
 
 
-        if incremental_validation_type=='b' and incremental_step>0 and ((round_n+1) % incremental_rounds ) == 0:
+        if incremental_step>0 and ((round_n+1) % incremental_rounds ) == 0:
 
             test_r_loss=np.mean(test_c_loss)
             test_r_prec=np.mean(test_c_prec)
@@ -489,7 +484,7 @@ def client_train(per_client_output_avg, per_client_act_avg, per_client_layers_av
                  list_name, soft_logits, soft_logits_l, output_base,average, external_distillation, valid_loader_server, common_dataset_size,
                  layer,  loss_type,path, multiloss, scale, multiloss_type,
                  incremental_step, mu, temperature, incremental_rounds, model_buffer_size, per_round_soft_activation, per_task_soft_activation, test_loader,
-                 test_c_loss, test_c_prec, incremental_validation_type, valid_loader_server_inc):
+                 test_c_loss, test_c_prec,  valid_loader_server_inc):
 
 
 
@@ -706,7 +701,7 @@ def client_train(per_client_output_avg, per_client_act_avg, per_client_layers_av
 
 
                 ###feature extraction
-                extracted_logits, extracted_layer_logits, extracted_grads, extracted_targets, extracted_act =logits_extraction(model, valid_loader_server, layer, n_classes, average,
+                extracted_logits, extracted_layer_logits,  extracted_act =logits_extraction(model, valid_loader_server, layer, n_classes, average,
                     output_base,act_base, multiloss, scale, incremental_step )
 
 
@@ -751,10 +746,7 @@ def client_train(per_client_output_avg, per_client_act_avg, per_client_layers_av
             per_client_output_avg.append(output_avg)
 
 
-    if alphamix_global:
 
-        per_client_grads_avg.append(extracted_grads)
-        per_client_target_avg.append(extracted_targets)
 
 
 
@@ -787,7 +779,7 @@ def client_train(per_client_output_avg, per_client_act_avg, per_client_layers_av
             }, 'local_model_' + str(client), filepath=save_path)
 
 
-    if (incremental_validation_type=='a') and  (incremental_step>0) and ((round_n+1) % incremental_rounds  == 0) :
+    if (incremental_step>0) and ((round_n+1) % incremental_rounds  == 0) :
 
 
 
@@ -1669,7 +1661,7 @@ def logits_extraction(model,train_loader, layer, n_classes, average, output_base
 
 
 
-    return output_base, output_base_layers, grads_base, target_base, act_base
+    return output_base, output_base_layers, act_base
 
 
 
@@ -1769,7 +1761,7 @@ def external_distillation(mod, normalization, depth, layer, n_classes, average, 
 
     for c in range(n_clients):
 
-        output_base, _, _, _, _ = logits_extraction(model_init, train_loader_list[c], layer, n_classes, average,
+        output_base, _, _ = logits_extraction(model_init, train_loader_list[c], layer, n_classes, average,
                                 output_base, act_base, multiloss, scale, incremental_step)
         if average:
             per_client_logits[c, :, :] = output_base

@@ -51,7 +51,7 @@ def main(total_epochs, evaluate, path, splits, t_round, wd, normalization, n_cli
          external_distillation, save_path, layer, average, common_dataset_size,
          loss_type, path_s, beta,
          multiloss, scale, multiloss_type, incremental_step, mu, temperature,
-         incremental_rounds, incremental_validation_type, model_buffer_size, exemplar_percentage):
+         incremental_rounds,  model_buffer_size, exemplar_percentage):
     writer = SummaryWriter(log_dir='./' + save_path)
     print(splits)
 
@@ -106,7 +106,7 @@ def main(total_epochs, evaluate, path, splits, t_round, wd, normalization, n_cli
                                                                                 path_s, multiloss,scale,multiloss_type,incremental_step,
                                                                                 train_set,valid_set,batch_size,valid_dataset_server,server_exemplar_size,
                                                                                 client_train_exemplar_size,client_valid_exemplar_size,mu,temperature,
-                                                                                incremental_rounds,incremental_validation_type, model_buffer_size,
+                                                                                incremental_rounds, model_buffer_size,
                                                                                 testSet,test_loader)
 
     writer.close()
@@ -229,7 +229,6 @@ if __name__ == '__main__':
 
     argument_dict['incremental_step'] = 20
     argument_dict['incremental_rounds'] = 6
-    argument_dict['incremental_validation_type'] = 'b'
     argument_dict['model_buffer_size'] = 4
     argument_dict['mu'] = 0.5
     argument_dict['beta'] = 0.5
@@ -261,7 +260,7 @@ if __name__ == '__main__':
              argument_dict['multiloss_type'],  argument_dict['incremental_step'],
              argument_dict['mu'],
              argument_dict['temperature'], argument_dict['incremental_rounds'],
-             argument_dict['incremental_validation_type'], argument_dict['model_buffer_size'],
+             argument_dict['model_buffer_size'],
              argument_dict['exemplar_percentage'])
         count += 1
 
