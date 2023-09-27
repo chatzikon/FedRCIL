@@ -4,7 +4,7 @@ The source code of the paper "FedRCIL: Federated Knowledge Distillation for Repr
 
 **Installation**
 
-Run pip install to-requirements.txt to install the required packages
+Run pip install -r equirements.txt to install the required packages
 
 **Proposed method**
 
