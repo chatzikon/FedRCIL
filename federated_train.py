@@ -152,7 +152,7 @@ def main(total_epochs, evaluate, path, splits, t_round, wd, normalization, n_cli
         for i in range(n_clients):
             checkpoint = load_checkpoint_local('local_model_' + str(i), save_path)
             model.load_state_dict(checkpoint['state_dict'])
-            loss, prec = test(model, test_loader, False)
+            loss, prec = test(model, test_loader)
             f.write(str(prec) + '\n')
             valid_prec_clients[i] = prec
 
