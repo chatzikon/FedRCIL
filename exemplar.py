@@ -206,7 +206,7 @@ def Image_transform(images, transform):
 def create_all_incremental_dataloaders(model_inc, feature_extractor, client,  seen_ids, test_transform,
                                        train_loader_list, valid_loader_list, exemplar_classes, incremental_step, train_set, batch_size,
                                        client_train_exemplar_size, exemplar_ids_tr, exemplar_ids_val, exemplar_ids_srv, valid_set, client_valid_exemplar_size, feature_extractor_np,
-                                       ):
+                                       incremental_validation_type):
 
 
 
@@ -214,25 +214,43 @@ def create_all_incremental_dataloaders(model_inc, feature_extractor, client,  se
 
 
 
+    if incremental_validation_type=='a':
+
+        train_loader_list[client], exemplar_ids_tr[client] = incremental_dataloader_creation(train_loader_list[client],
+                                                                                             train_set[client],
+                                                                                             seen_ids,
+                                                                                             exemplar_classes,
+                                                                                             batch_size, test_transform,
+                                                                                             client_train_exemplar_size,
+                                                                                             model_inc,
+                                                                                             exemplar_ids_tr[client],
+                                                                                             incremental_step)
+
+        valid_loader_list[client], exemplar_ids_val[client] = incremental_dataloader_creation(valid_loader_list[client], valid_set[client],
+                                                                       seen_ids, exemplar_classes,
+                                                                       batch_size, test_transform,
+                                                                       client_valid_exemplar_size, model_inc, exemplar_ids_val[client],
+                                                                       incremental_step)
+
+    elif incremental_validation_type=='b':
+
+        train_loader_list[client], exemplar_ids_tr[client] = incremental_dataloader_creation(train_loader_list[client],
+                                                                                             train_set[client],
+                                                                                             seen_ids,
+                                                                                             0,
+                                                                                             batch_size, test_transform,
+                                                                                             client_train_exemplar_size,
+                                                                                             model_inc,
+                                                                                             exemplar_ids_srv,
+                                                                                             incremental_step)
 
 
-    train_loader_list[client], exemplar_ids_tr[client] = incremental_dataloader_creation(train_loader_list[client],
-                                                                                         train_set[client],
-                                                                                         seen_ids,
-                                                                                         0,
-                                                                                         batch_size, test_transform,
-                                                                                         client_train_exemplar_size,
-                                                                                         model_inc,
-                                                                                         exemplar_ids_srv,
-                                                                                         incremental_step)
 
-
-
-    valid_loader_list[client], exemplar_ids_val[client] = incremental_dataloader_creation(valid_loader_list[client], valid_set[client],
-                                                               [0, seen_ids[1]], 0,
-                                                               batch_size, test_transform,
-                                                               client_valid_exemplar_size, model_inc, 0,
-                                                               incremental_step)
+        valid_loader_list[client], exemplar_ids_val[client] = incremental_dataloader_creation(valid_loader_list[client], valid_set[client],
+                                                                   [0, seen_ids[1]], 0,
+                                                                   batch_size, test_transform,
+                                                                   client_valid_exemplar_size, model_inc, 0,
+                                                                   incremental_step)
 
 
 
